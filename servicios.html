@@ -292,7 +292,7 @@ p{margin:0}
 
 /* ---------- Galería ---------- */
 .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
-.gallery--preview{grid-template-columns:repeat(3,1fr)}
+.gallery--preview{grid-template-columns:repeat(4,1fr)}
 .shot{
   position:relative;overflow:hidden;border-radius:var(--radius);
   background:var(--sand);box-shadow:var(--shadow-sm);
@@ -334,9 +334,10 @@ p{margin:0}
 .review .stars{font-size:.9rem}
 .review p{color:var(--ink);line-height:1.55}
 .review__author{display:flex;align-items:center;gap:.6rem;margin-top:auto;padding-top:var(--s1)}
-.review__avatar{width:36px;height:36px;border-radius:50%;background:var(--blue-tint);color:var(--blue-deep);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex:none}
-.review__author b{display:block;font-size:.92rem;font-weight:600;line-height:1.25}
-.review__author span{display:block;font-size:.78rem;color:var(--ink-2)}
+.review__avatar{width:36px;height:36px;border-radius:50%;background:var(--blue-tint);color:var(--blue-deep);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex:none;overflow:hidden}
+.review__avatar svg{width:17px;height:17px;flex:none}
+.review__author div b{display:block;font-size:.92rem;font-weight:600;line-height:1.25}
+.review__author div span{display:block;font-size:.78rem;color:var(--ink-2)}
 .gmark{width:16px;height:16px;vertical-align:-2px}
 
 /* ---------- Bloque ubicación / contacto ---------- */
@@ -490,10 +491,21 @@ p{margin:0}
   .hero__badge span{font-size:.7rem}
   /* Eyebrow más compacto para que no se amontone */
   .eyebrow{letter-spacing:.14em;font-size:.72rem}
+
+  /* Quitar el botón de WhatsApp del header (queda la hamburguesa) */
+  .header-actions{display:none}
+  /* Ocultar la descripción del hero para subir los botones */
+  .hero__lead{display:none}
+  .hero h1{margin-bottom:var(--s4)}
+  .hero__cta{margin-top:0}
+  /* "Nuestro trabajo": 4 fotos en 2×2 bien alineadas */
+  .gallery--preview{grid-template-columns:repeat(2,1fr);gap:.7rem}
 }
 
 @media (max-width:560px){
-  .gallery,.gallery--preview{grid-template-columns:repeat(2,1fr);gap:.6rem}
+  .gallery,.gallery--preview{grid-template-columns:repeat(2,1fr);gap:.55rem}
+  /* Galería completa: fotos más grandes, casi de borde a borde */
+  .gallery:not(.gallery--preview){margin-inline:calc(-1 * var(--gutter) + 10px)}
   .hero__meta{flex-direction:column;gap:.7rem;align-items:stretch}
   .hero__stat{flex-direction:row;align-items:baseline;gap:.7rem}
   .hero__stat b{font-size:1.35rem;min-width:3.7rem}
@@ -509,6 +521,49 @@ p{margin:0}
 /* Pantallas amplias: respiración extra */
 @media (min-width:1280px){
   :root{--section-y:7rem}
+}
+
+/* ============================================================
+   CARRUSEL (reseñas, valores e imágenes en móvil)
+   En escritorio la pista mantiene su rejilla; los controles
+   solo aparecen en móvil.
+   ============================================================ */
+.carousel{position:relative}
+.carousel__controls{display:none}
+
+@media (max-width:760px){
+  .carousel__track{
+    display:flex;gap:var(--s2);
+    overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    padding:.35rem .25rem 1rem;margin-inline:-.25rem;
+  }
+  .carousel__track::-webkit-scrollbar{display:none}
+  .carousel__track > *{flex:0 0 86%;scroll-snap-align:center}
+  /* Dentro del carrusel las tarjetas siempre están visibles */
+  .js .carousel__track > *{opacity:1;transform:none}
+
+  .carousel__controls{
+    display:flex;align-items:center;justify-content:center;
+    gap:1.1rem;margin-top:var(--s3);
+  }
+  .carousel__btn{
+    width:46px;height:46px;border-radius:50%;flex:none;padding:0;
+    border:1.5px solid var(--sand-deep);background:var(--white);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .2s var(--ease),border-color .2s var(--ease),opacity .2s var(--ease),transform .12s var(--ease);
+    box-shadow:var(--shadow-sm);
+  }
+  .carousel__btn svg{width:21px;height:21px}
+  .carousel__btn:hover{border-color:var(--ink-2)}
+  .carousel__btn:active{transform:scale(.93)}
+  .carousel__btn:disabled{opacity:.32;cursor:default;box-shadow:none}
+  .carousel__dots{display:flex;align-items:center;gap:.5rem}
+  .carousel__dot{
+    width:8px;height:8px;border-radius:50%;border:0;padding:0;cursor:pointer;
+    background:var(--sand-deep);transition:background .25s var(--ease),width .25s var(--ease);
+  }
+  .carousel__dot.is-active{background:var(--ink);width:22px;border-radius:5px}
 }
 
 </style>
@@ -696,7 +751,7 @@ p{margin:0}
           <li>C. de Casasola, 7</li>
           <li>47005 Valladolid</li>
           <li><a href="tel:+34674576560">674 57 65 60</a></li>
-          <li>L–S · 10–14 y 16–21</li>
+          <li>Lun–Sáb · horario continuo</li>
         </ul>
       </div>
     </div>
@@ -769,6 +824,92 @@ p{margin:0}
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
     items.forEach(function (el) { io.observe(el); });
   }
+
+  /* ---- Carrusel (reseñas, valores e imágenes) ---- */
+  var mq = window.matchMedia('(max-width: 760px)');
+
+  function wireCarousel(track, controls) {
+    var prev = controls.querySelector('[data-dir="prev"]');
+    var next = controls.querySelector('[data-dir="next"]');
+    var dotsWrap = controls.querySelector('.carousel__dots');
+    var kids = track.children;
+    var dots = [];
+    for (var i = 0; i < kids.length; i++) {
+      var d = document.createElement('button');
+      d.type = 'button';
+      d.className = 'carousel__dot';
+      d.setAttribute('aria-label', 'Ir al elemento ' + (i + 1));
+      d.addEventListener('click', (function (idx) {
+        return function () { go(idx); };
+      })(i));
+      dotsWrap.appendChild(d);
+      dots.push(d);
+    }
+    function current() {
+      var tr = track.getBoundingClientRect();
+      var center = tr.left + tr.width / 2;
+      var best = 0, bestD = Infinity;
+      for (var i = 0; i < kids.length; i++) {
+        var r = kids[i].getBoundingClientRect();
+        var dd = Math.abs((r.left + r.width / 2) - center);
+        if (dd < bestD) { bestD = dd; best = i; }
+      }
+      return best;
+    }
+    function go(i) {
+      i = Math.max(0, Math.min(kids.length - 1, i));
+      var r = kids[i].getBoundingClientRect();
+      var tr = track.getBoundingClientRect();
+      track.scrollBy({ left: (r.left + r.width / 2) - (tr.left + tr.width / 2), behavior: 'smooth' });
+    }
+    function update() {
+      var c = current();
+      for (var i = 0; i < dots.length; i++) dots[i].classList.toggle('is-active', i === c);
+      if (prev) prev.disabled = (c <= 0);
+      if (next) next.disabled = (c >= kids.length - 1);
+    }
+    if (prev) prev.addEventListener('click', function () { go(current() - 1); });
+    if (next) next.addEventListener('click', function () { go(current() + 1); });
+    var raf;
+    track.addEventListener('scroll', function () {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    }, { passive: true });
+    update();
+  }
+
+  function initCarousels() {
+    var tracks = document.querySelectorAll('.feature-grid, .review-grid');
+    tracks.forEach(function (track) {
+      if (!track.__carousel) {
+        track.__carousel = true;
+        track.classList.add('carousel__track');
+        var wrap = document.createElement('div');
+        wrap.className = 'carousel';
+        track.parentNode.insertBefore(wrap, track);
+        wrap.appendChild(track);
+        var controls = document.createElement('div');
+        controls.className = 'carousel__controls';
+        controls.innerHTML =
+          '<button class="carousel__btn" type="button" data-dir="prev" aria-label="Anterior">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>' +
+          '<div class="carousel__dots"></div>' +
+          '<button class="carousel__btn" type="button" data-dir="next" aria-label="Siguiente">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>';
+        wrap.appendChild(controls);
+        wireCarousel(track, controls);
+      }
+      if (mq.matches) {
+        for (var i = 0; i < track.children.length; i++) track.children[i].classList.add('in');
+      }
+    });
+  }
+  initCarousels();
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(initCarousels, 200);
+  }, { passive: true });
 })();
 
 </script>
