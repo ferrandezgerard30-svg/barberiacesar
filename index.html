@@ -456,6 +456,10 @@ p{margin:0}
   /* Menú móvil */
   .nav-toggle{display:inline-flex}
   .header-actions .btn-call-label{display:none}
+  /* Al abrir el menú, la marca se oculta para no quedar por encima del panel */
+  .brand{transition:opacity .22s var(--ease), visibility .22s var(--ease)}
+  body.menu-open .brand{opacity:0;visibility:hidden;pointer-events:none}
+  body.menu-open .header-actions{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s var(--ease), visibility .22s var(--ease)}
   .nav{
     position:fixed;top:0;right:0;height:100vh;height:100dvh;width:min(82vw,330px);
     flex-direction:column;align-items:stretch;gap:.25rem;
